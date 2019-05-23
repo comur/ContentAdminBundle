@@ -1,6 +1,6 @@
 {% block inline_content_widget %}
     {% spaceless %}
-        {{- block('form_widget_simple') -}}
+        {{- form_widget(form) -}}
         <div class="nav-tabs-custom" id="comurContentAdminContainer">
             <ul class="nav nav-tabs" role="tablist">
             {% for locale in locales %}

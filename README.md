@@ -65,7 +65,15 @@ comur_content_admin:
 
 Ex: screenshot of multilingual admin
 
-[TODO ADD SCREENSHOT]
+![Edit Inline page multilingual](/Resources/docs/edit-text?raw=true "Edit multilingual text")
+
+Fullscreen mode:
+
+![Edit Inline page fullscreen](/Resources/docs/edit-fullscreen?raw=true "Edit fullscreen text")
+
+You can even edit a button label:
+
+![Edit Inline page's button text multilingual](/Resources/docs/edit-button?raw=true "Edit button text")
 
 Usage
 =====
