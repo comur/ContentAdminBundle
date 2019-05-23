@@ -1,0 +1,115 @@
+{% block inline_content_widget %}
+    {% spaceless %}
+        {{- block('form_widget_simple') -}}
+        <div class="nav-tabs-custom" id="comurContentAdminContainer">
+            <ul class="nav nav-tabs" role="tablist">
+            {% for locale in locales %}
+                <li class="nav-item {{ loop.first ? "active" : "" }}">
+                    <a aria-controls="comurContentAdminIframeContainer_{{ locale }}" aria-expanded="true" href="#comurContentAdminIframeContainer_{{ locale }}" class="nav-link" data-toggle="tab" role="tab">{{ locale }}</a>
+                </li>
+            {% endfor %}
+            </ul>
+            <div class="tab-content">
+            {% for locale in locales %}
+                <div role="tabpanel" class="comurContentAdminIframeContainer tab-pane {{ loop.first ? "active": "" }}" id="comurContentAdminIframeContainer_{{ locale }}" style="min-height: {{ iframe_height|default('500') }}px">
+                    <div class="comurContentAdminIframeFullscreenHeader" id="comurContentAdminIframeFullscreenHeader_{{ locale }}" style="z-index: 1051; display: none; height: 50px; line-height: 50px; padding-left: 10px; position: fixed; top: 0; left: 0; width: 100%; background-color: white;">
+                        <a href="#" class="btn btn-warning fullscreenOff" id="fullscreenOff_{{ locale }}" data-locale="{{ locale }}"><i class="fa fa-compress"></i>&nbsp;{{ "Escape fullscreen"|trans({}, 'ComurContentAdminBundle') }}</a>
+                    </div>
+                    <div class="comurContentAdminIframeNormalHeader" id="comurContentAdminIframeNormalHeader_{{ locale }}" style="padding: 10px">
+                        <a href="#" class="btn btn-warning fullscreenOn" id="fullscreenOn_{{ locale }}" data-locale="{{ locale }}"><i class="fa fa-expand"></i>&nbsp;{{ "Fullscreen"|trans({}, 'ComurContentAdminBundle') }}</a>
+                    </div>
+                    <iframe
+                            class="comurContentAdminIframe"
+                            id="comurContentAdminIframe_{{ locale }}"
+                            data-locale="{{ locale }}"
+                            width="100%"
+                            style="width: 100%; height: {{ iframe_height|default('500') }}px; border: 0;" height="100%"
+                    ></iframe>
+                </div>
+            {% endfor %}
+            </div>
+        </div>
+        <script>
+          const data = {{ form.vars.value ? form.vars.value|raw : '{}' }};
+
+          function loadIframe(template) {
+            {% for locale in locales %}
+                if (template) {
+                  $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}`)
+                  $('comurContentAdminContainer_{{ locale }}').show();
+                  $('#comurContentAdminIframe_{{ locale }}').on('load', function(){
+                    sendMessage('loadEditor:load', '{{ locale }}');
+                    document.getElementById('comurContentAdminIframe_{{ locale }}').contentWindow.onunload = function(){
+                      return false;
+                      console.log('unload')
+                      if (navigator.appName == 'Microsoft Internet Explorer') {
+                        document.getElementById('comurContentAdminIframe_{{ locale }}').document.execCommand('Stop');
+                      } else {
+                        document.getElementById('comurContentAdminIframe_{{ locale }}').stop();
+                      }
+                    }
+                  });
+                } else {
+                  $('#comurContentAdminContainer').hide();
+                }
+            {% endfor %}
+          }
+          {% if template_field_name is defined %}
+              const templateFieldId = '#{{ form.vars.id|replace({(form.vars.name): template_field_name}) }}';
+              $(templateFieldId).on('change', function () {
+                loadIframe($(this).val());
+              });
+              loadIframe($(templateFieldId).val());
+          {% else %}
+              loadIframe("{{ template }}");
+          {% endif %}
+
+          $('.fullscreenOn').on('click', function(){
+            $('#comurContentAdminIframe_'+$(this).data('locale')).css({
+              'position': 'fixed',
+              'top': '50px',
+              'left': '0',
+              'right': '0',
+              'bottom': '0',
+              'z-index': '1050',
+              'height': '100%',
+            });
+            $('#comurContentAdminIframeFullscreenHeader_'+$(this).data('locale')).show();
+            $('#comurContentAdminIframeNormalHeader_'+$(this).data('locale')).hide();
+          });
+          $('.fullscreenOff').on('click', function(){
+            $('#comurContentAdminIframe_'+$(this).data('locale')).css({
+              'position': 'relative',
+              'height': '{{ iframe_height|default('500') }}px'
+            });
+            $('#comurContentAdminIframeFullscreenHeader_'+$(this).data('locale')).hide();
+            $('#comurContentAdminIframeNormalHeader_'+$(this).data('locale')).show();
+          });
+
+          function bindEvent(element, eventName, eventHandler) {
+            if (element.addEventListener){
+              element.addEventListener(eventName, eventHandler, false);
+            } else if (element.attachEvent) {
+              element.attachEvent('on' + eventName, eventHandler);
+            }
+          }
+
+          // Send a message to the child iframe
+          var sendMessage = function(msg, locale) {
+            // Make sure you are sending a string, and to stringify JSON
+            $('#comurContentAdminIframe_'+locale)[0].contentWindow.postMessage(msg, document.location.href);
+          };
+
+          // Listen to message from child window
+          bindEvent(window, 'message', function (e) {
+            const newdata = JSON.parse(e.data);
+            if (typeof data[newdata.locale] === 'undefined') {
+              data[newdata.locale] = {};
+            }
+            data[newdata.locale][newdata.id] = newdata.value;
+            $('#{{ form.vars.id }}').val(JSON.stringify(data));
+          });
+
+        </script>
+    {% endspaceless %}
+{% endblock inline_content_widget %}

@@ -1,0 +1,22 @@
+services:
+    comur_content_admin.inline_content_data_transformer:
+        class: Comur\ContentAdminBundle\DataTransformer\InlineContentDataTransformer
+        arguments: ["@doctrine.orm.entity_manager"]
+
+    comur_content_admin.inline_content_type:
+        class: Comur\ContentAdminBundle\Form\InlineContentType
+        arguments: ["@comur_content_admin.inline_content_data_transformer", "%comur_content_admin.locales%"]
+        tags:
+            - { name: form.type }
+
+    comur_content_admin.inline_content_twig_filter:
+        class: Comur\ContentAdminBundle\Twig\InlineContent
+        tags:
+            - { name: twig.extension }
+
+#    _defaults:
+#        bind:
+#            autowire: true      # Automatically injects dependencies in your services.
+#            autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+#            public: false
+#            $projectDir: '%kernel.project_dir%'

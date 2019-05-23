@@ -1,0 +1,59 @@
+<style>
+  [data-content-id] {
+    border: dotted 1px #aaaaaa;
+  }
+</style>
+{% include template %}
+<script src="https://cdn.ckeditor.com/4.11.4/standard/ckeditor.js"></script>
+<script>
+    let parentUrl = null;
+    $(document).ready(function(){
+      // addEventListener support for IE8
+      function bindEvent(element, eventName, eventHandler) {
+        if (element.addEventListener) {
+          element.addEventListener(eventName, eventHandler, false);
+        } else if (element.attachEvent) {
+          element.attachEvent('on' + eventName, eventHandler);
+        }
+      }
+      // Send a message to the parent
+      var sendMessage = function (msg) {
+        // Make sure you are sending a string, and to stringify JSON
+        window.parent.postMessage(msg, parentUrl);
+      };
+
+      // Listen to messages from parent window
+      bindEvent(window, 'message', function (e) {
+        const action = e.data.split(':')[0];
+        const value = e.data.split(':')[1];
+        switch (action) {
+          case 'loadEditor':
+            $('a').on('click', function(e){
+              e.preventDefault();
+              return false;
+            });
+            parentUrl = e.origin;
+            CKEDITOR.dtd.$editable.a = 1;
+            CKEDITOR.disableAutoInline = true;
+            CKEDITOR.config.removeButtons = 'Image';
+            $('[data-content-id]').each(function(idx, el) {
+              $(el).attr('contenteditable', true);
+              CKEDITOR.inline( el, {
+                removeButtons: 'Image'
+              } );
+            });
+            for (var i in CKEDITOR.instances) {
+              CKEDITOR.instances[i].on('change', function(evt) {
+                const data = {
+                  id: $(evt.editor.element).attr('data-content-id'),
+                  value: this.getData(),
+                  locale: '{{ app.request.query.get('locale') }}'
+                };
+                sendMessage(JSON.stringify(data));
+              });
+            }
+            break;
+        }
+      });
+    })
+</script>

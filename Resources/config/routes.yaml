@@ -1,0 +1,3 @@
+comur_content_admin.content_editor:
+    path: /content/editor
+    controller: Comur\ContentAdminBundle\Controller\ContentController::contentEditor
