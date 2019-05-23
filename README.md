@@ -65,15 +65,15 @@ comur_content_admin:
 
 Ex: screenshot of multilingual admin
 
-![Edit Inline page multilingual](/Resources/docs/edit-text?raw=true "Edit multilingual text")
+![Edit Inline page multilingual](/Resources/docs/edit-text.png?raw=true "Edit multilingual text")
 
 Fullscreen mode:
 
-![Edit Inline page fullscreen](/Resources/docs/edit-fullscreen?raw=true "Edit fullscreen text")
+![Edit Inline page fullscreen](/Resources/docs/edit-fullscreen.png?raw=true "Edit fullscreen text")
 
 You can even edit a button label:
 
-![Edit Inline page's button text multilingual](/Resources/docs/edit-button?raw=true "Edit button text")
+![Edit Inline page's button text multilingual](/Resources/docs/edit-button.png?raw=true "Edit button text")
 
 Usage
 =====
