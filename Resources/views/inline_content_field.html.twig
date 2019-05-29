@@ -38,10 +38,12 @@
                   $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}`)
                   $('comurContentAdminContainer_{{ locale }}').show();
                   $('#comurContentAdminIframe_{{ locale }}').on('load', function(){
-                    sendMessage('loadEditor:load', '{{ locale }}');
+                    sendMessage(JSON.stringify({
+                      action: 'loadEditor'
+                    }), '{{ locale }}');
                     document.getElementById('comurContentAdminIframe_{{ locale }}').contentWindow.onunload = function(){
                       return false;
-                      console.log('unload')
+                      // console.log('unload')
                       if (navigator.appName == 'Microsoft Internet Explorer') {
                         document.getElementById('comurContentAdminIframe_{{ locale }}').document.execCommand('Stop');
                       } else {
@@ -103,12 +105,48 @@
           // Listen to message from child window
           bindEvent(window, 'message', function (e) {
             const newdata = JSON.parse(e.data);
-            if (typeof data[newdata.locale] === 'undefined') {
-              data[newdata.locale] = {};
+            // console.log(newdata);
+            if (typeof newdata.request !== 'undefined' && newdata.request === 'getImage') {
+              getImageWithComurImage(newdata);
             }
-            data[newdata.locale][newdata.id] = newdata.value;
-            $('#{{ form.vars.id }}').val(JSON.stringify(data));
+            else {
+              if (typeof data[newdata.locale] === 'undefined') {
+                data[newdata.locale] = {};
+              }
+              data[newdata.locale][newdata.id] = newdata.value;
+              $('#{{ form.vars.id }}').val(JSON.stringify(data));
+            }
           });
+
+          {% if enableComurImageBundle %}
+
+          function getImageWithComurImage(requestdata) {
+            const defaultConfig = {{ form.vars.comur_image_params|json_encode|raw }};
+            const options = {
+              cropConfig: $.extend({}, defaultConfig['cropConfig'], requestdata.comurImageData['cropConfig']),
+              uploadConfig: $.extend({}, defaultConfig['uploadConfig'], requestdata.comurImageData['uploadConfig']),
+            };
+            // console.log(options);
+            initializeImageManager(requestdata.id, options, function(file){
+              if (typeof data[requestdata.locale] === 'undefined') {
+                data[requestdata.locale] = {};
+              }
+              data[requestdata.locale][requestdata.id] = file.previewSrc;
+              $('#{{ form.vars.id }}').val(JSON.stringify(data));
+              sendMessage(JSON.stringify({
+                action: 'updateImage',
+                data: {
+                  src: file.previewSrc,
+                  contentId: requestdata.id
+                }
+              }),requestdata.locale)
+            });
+            $('#image_upload_modal').modal({
+              backdrop: 'static',
+              keyboard: false
+            });
+          }
+          {% endif %}
 
         </script>
     {% endspaceless %}

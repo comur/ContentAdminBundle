@@ -19,6 +19,9 @@ class Configuration implements ConfigurationInterface
                     ->defaultValue(['en'])
                     ->end()
                 ->end()
+                ->booleanNode('enable_comur_image_bundle')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ;
 

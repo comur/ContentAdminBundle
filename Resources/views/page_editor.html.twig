@@ -3,8 +3,19 @@
     border: dotted 1px #aaaaaa;
   }
 </style>
+
 {% include template %}
+
 <script src="https://cdn.ckeditor.com/4.11.4/standard/ckeditor.js"></script>
+
+{% if enableComurImageBundle %}
+{% include "ComurImageBundle:Form:croppable_image_modal.html.twig" with {'include_jquery': false, 'include_bootstrap': false} %}
+
+<script src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+<script src="{{ path('fos_js_routing_js', {"callback": "fos.Router.setData"}) }}"></script>
+
+{% endif %}
+
 <script>
     let parentUrl = null;
     $(document).ready(function(){
@@ -22,10 +33,22 @@
         window.parent.postMessage(msg, parentUrl);
       };
 
+      function toCamel(s) {
+        return s.replace(/([-_][a-z])/ig, ($1) => {
+          return $1.toUpperCase()
+                  .replace('-', '')
+                  .replace('_', '');
+        });
+      }
+
+      function firstLetterLower(s) {
+        return s.charAt(0).toLowerCase() + s.slice(1);
+      }
+
       // Listen to messages from parent window
       bindEvent(window, 'message', function (e) {
-        const action = e.data.split(':')[0];
-        const value = e.data.split(':')[1];
+        const data = JSON.parse(e.data);
+        const action = data.action;
         switch (action) {
           case 'loadEditor':
             $('a').on('click', function(e){
@@ -37,10 +60,93 @@
             CKEDITOR.disableAutoInline = true;
             CKEDITOR.config.removeButtons = 'Image';
             $('[data-content-id]').each(function(idx, el) {
-              $(el).attr('contenteditable', true);
-              CKEDITOR.inline( el, {
-                removeButtons: 'Image'
-              } );
+              const tagName = $(el)[0].tagName;
+              {% if enableComurImageBundle %}
+              if (tagName === 'IMG') {
+                const id = 'image_preview_image_' + $(el).data('content-id');
+                $(el).attr('id', id);
+                const btn = $("<button class='btn btn-success'><i class='fa fa-pencil'></i> Edit</button>");
+                const data = $(el).data();
+                // const comurImageData =  {
+                //   "uploadConfig": {
+                //     "uploadRoute":"comur_api_upload",
+                //     // "uploadUrl":"/app/public/uploads/pages/",
+                //     // "webDir":"uploads/pages",
+                //     "fileExt":"*.jpg;*.gif;*.png;*.jpeg",
+                //     // "libraryDir":"/app/public/uploads/pages/",
+                //     "libraryRoute":"comur_api_image_library",
+                //     "showLibrary":true,
+                //     "saveOriginal":false,
+                //     "generateFilename":true
+                //   },
+                //   "cropConfig": {
+                //     "minWidth":1200,
+                //     "minHeight":630,
+                //     "aspectRatio":true,
+                //     "cropRoute":"comur_api_crop",
+                //     "forceResize":true,
+                //     // "thumbs":[{
+                //     //   "maxWidth":600,
+                //     //   "maxHeight":300,
+                //     //   "useAsFieldImage":true
+                //     // }]
+                //   },
+                //   // "fieldImage": {
+                //   //   "maxWidth":600,
+                //   //   "maxHeight":300,
+                //   //   "useAsFieldImage":true
+                //   // }
+                // };
+                const comurImageData = {
+                  cropConfig: {},
+                  uploadConfig: {}
+                };
+                // console.log(data);
+                for(let d in data) {
+                  // console.log(d);
+                  if (d.indexOf('imageCrop') > -1) {
+                    comurImageData['cropConfig'][firstLetterLower(d.replace('imageCrop', ''))] = data[d];
+                  }
+                  if (d.indexOf('imageUpload') > -1) {
+                    comurImageData['uploadConfig'][firstLetterLower(d.replace('imageUpload', ''))] = data[d];
+                  }
+                  // console.log(comurImageData);
+                }
+
+                // Force to fit the exact size of the image if width and height are given
+                if ($(el).attr('width') && $(el).attr('height')) {
+                  comurImageData['cropConfig']['minWidth'] = $(el).attr('width');
+                  comurImageData['cropConfig']['minHeight'] = $(el).attr('height');
+                  comurImageData['cropConfig']['forceResize'] = true;
+                }
+
+                // Ask parent to show ComurImageBundle to update image
+                btn.on('click', function(){
+                  const data = {
+                    id: $(el).data('content-id'),
+                    // value: this.getData(),
+                    locale: '{{ app.request.query.get('locale') }}',
+                    request: 'getImage',
+                    comurImageData: comurImageData
+                  };
+                  sendMessage(JSON.stringify(data));
+                });
+
+                btn.css({
+                  'position': 'absolute',
+                  'margin': '10px',
+                  'right': '10px'
+                });
+                $(el).parent().prepend(btn)
+                return false;
+              }
+              {% endif %}
+              if (tagName !== 'IMG') {
+                $(el).attr('contenteditable', true);
+                CKEDITOR.inline(el, {
+                  removeButtons: 'Image'
+                });
+              }
             });
             for (var i in CKEDITOR.instances) {
               CKEDITOR.instances[i].on('change', function(evt) {
@@ -51,6 +157,14 @@
                 };
                 sendMessage(JSON.stringify(data));
               });
+            }
+            break;
+          case 'updateImage':
+            if (data.data && data.data.src && data.data.contentId) {
+              const el = $(`[data-content-id=${data.data.contentId}]`);
+              if (el) {
+                el.attr('src', data.data.src);
+              }
             }
             break;
         }

@@ -1,3 +1,17 @@
+Introduction
+============
+
+This bundles helps you to add a field in your backend and edit all template contents dynamically thanks to [CKEditor inline editing](https://ckeditor.com/docs/ckeditor4/latest/guide/dev_inline.html)
+
+It lets you edit also images by using [ComurImageBundle](https://github.com/comur/ComurImageBundle)
+
+If this bundle helps you reduce time to develop, you can pay me a cup of coffee ;)
+
+[![coffee](Resources/docs/coffee.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2RWFAL3ZNTGN6&source=url)
+
+[![coffee](https://www.paypalobjects.com/en_US/FR/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=2RWFAL3ZNTGN6&source=url)
+
+
 Installation
 ============
 
@@ -60,25 +74,45 @@ You can configure following parameters by creating a comur_content_admin.yaml in
 #config/comur_content_admin.yaml
 
 comur_content_admin:
-    locales: ['en'] # this will add as many translation tabs as the number of locales when rendering content editing field 
+    locales: ['en'] # this will add as many translation tabs as the number of locales when rendering content editing field
 ```
 
 Ex: screenshot of multilingual admin
 
-![Edit Inline page multilingual](/Resources/docs/edit-text.png?raw=true "Edit multilingual text")
+![Edit Inline page multilingual](Resources/docs/edit-text.png?raw=true)
 
 Fullscreen mode:
 
-![Edit Inline page fullscreen](/Resources/docs/edit-fullscreen.png?raw=true "Edit fullscreen text")
+![Edit Inline page fullscreen](Resources/docs/edit-fullscreen.png?raw=true)
 
 You can even edit a button label:
 
-![Edit Inline page's button text multilingual](/Resources/docs/edit-button.png?raw=true "Edit button text")
+![Edit Inline page's button text multilingual](Resources/docs/edit-button.png?raw=true)
+
+### Editable images
+
+Edit images with [ComurImageBundle](https://github.com/comur/ComurImageBundle)
+
+![Editable image](Resources/docs/image-editable.png?raw=true)
+
+Select from your library (already uploaded images)
+
+![Editable image library](Resources/docs/image-lib.png?raw=true)
+
+Upload image
+
+![Editable image upload](Resources/docs/image-upload.png?raw=true)
+
+Crop on the go with HTML attribute defined sizes (crop / resize)
+
+![Editable image crop](Resources/docs/image-crop.png?raw=true)
 
 Usage
 =====
 
 ## Step 1: Add twig form template
+
+### NOT NEEDED ANYMORE, template is added automatically now !
 
 Add form field template to your twig configuration (config/twig.yaml):
 
@@ -128,7 +162,7 @@ protected function configureFormFields(FormMapper $formMapper): void
             'template' => 'frontend/index.html.twig', // optional, you must specify either one of template_field_name or template parameter
             'class' => Page::class, // classname of your entity
             'locales' => array('en', 'fr'), // Or pass a parameter (optional, you can globally configure it in yaml and override it here)
-            'required' => true // field extends symfony's HiddenType so you can use options from this class too
+            'required' => true // field extends symfony's HiddenType so you can use options from this class
         ))
         //...
     ;
@@ -197,3 +231,129 @@ class FrontController extends AbstractController
 }
 
 ```
+
+Using ComurImageBundle to edit images
+=====================================
+
+## Step 1: Install Comur Image Bundle
+
+Please follow instructions on [ComurImageBundle](https://github.com/comur/ComurImageBundle) to install it
+
+## Step 2: Activate comur_image_compatibility in config
+
+:warning: **NOT NEEDED ANYMORE, bundle checks if ComurImageBundle is installed or not and activates automatically if it finds it**
+
+```yaml
+comur_content_admin:
+  #...
+  enable_comur_image_bundle: true
+
+```
+
+## Step 3: Add data attributes on images of your template
+
+Ex: 
+
+```
+<img 
+  src="myimage.png" 
+  data-content-id="myHeaderImage" 
+  data-image-crop-min-width="300" 
+  data-image-crop-min-height="500"
+  data-image-upload-show-library="true"
+  data-image-upload-library-dir="headerimages" <!-- Special parameter : This suffix will be added to uploadRoute and uploadUrl -->
+  <!-- You can use (override for each image individually) all ComurImageBundle config parameters by prefixing it 
+  with data-image-upload for uploadConfig and data-image-crop for cropConfig (except thumbs parameter) -->
+  width="300" height="500" <!-- if you put width and height, ComurImageBundle will ask and crop for exact size of your requirements (forceResize=true) -->
+/>
+```
+
+This code will automatically replaced by twig filter and src will be automatically filled by database value
+
+This limits usage to img tags (and cannot be used for background images) so if someone has an idea to edit background images, let me know ;)
+
+## Step 4: Use it in your form
+
+```php
+use Comur\ContentAdminBundle\Form\InlineContentType;
+
+//...
+
+protected function configureFormFields(FormMapper $formMapper): void
+{
+    $myEntity = $this->getMyEntity(); // Change it :)
+
+    $formMapper
+        //...
+        ->add('content', InlineContentType::class, array(
+            'template_field_name' => 'template', // this will get template name from another field inside the same form (default is template)
+            'template' => 'frontend/index.html.twig', // optional, you must specify either one of template_field_name or template parameter
+            'class' => Page::class, // classname of your entity
+            'locales' => array('en', 'fr'), // Or pass a parameter (optional, you can globally configure it in yaml and override it here)
+            'required' => true // field extends symfony's HiddenType so you can use options from this class too
+            'comur_image_params' => array(
+                'uploadConfig' => array(
+                    'uploadRoute' => 'comur_api_upload', 		//optional
+                    'uploadUrl' => $myEntity->getUploadRootDir(),       // required - see explanation below (you can also put just a dir path)
+                    'webDir' => $myEntity->getUploadDir(),				// required - see explanation below (you can also put just a dir path)
+                    'fileExt' => '*.jpg;*.gif;*.png;*.jpeg', 	//optional
+                    'libraryDir' => null, 						//optional
+                    'libraryRoute' => 'comur_api_image_library', //optional
+                    'showLibrary' => true, 						//optional
+                    'saveOriginal' => 'originalImage',			//optional
+                    'generateFilename' => true			//optional
+                ),
+                'cropConfig' => array(
+                    'minWidth' => 588,
+                    'minHeight' => 300,
+                    'aspectRatio' => true, 				//optional
+                    'cropRoute' => 'comur_api_crop', 	//optional
+                    'forceResize' => false, 			//optional
+                    'thumbs' => array( 					//optional
+                      array(
+                        'maxWidth' => 180,
+                        'maxHeight' => 400,
+                        'useAsFieldImage' => true  //optional
+                      )
+                    )
+                )
+            )
+        ))
+        //...
+    ;
+}
+
+```
+
+Please refer to [ComurImageBundle documentation](https://github.com/comur/ComurImageBundle) for complete list of parameters
+
+Development
+===========
+
+Any help in improving this bundle is kindly appreciated ! Please do not hesitate to send PR !
+
+TODO
+====
+
+- Tests (not realy good at that so if someone wants to help !)
+- Add CKEditor parameters in config / form parameters
+- Parameter to not include ckeditor script if not needed (if already included elsewhere)
+- Find a way to pass parameters to templates (lot of time we have parameters to pass to templates and it's not possible for now)
+- ~~Add [ComurImageBundle](https://github.com/comur/ComurImageBundle) compatibility to edit images~~ **DONE**
+- Find a better way to replace content with data without using Dom Manipulation (can alter tags)
+
+Troubleshooting
+===============
+
+### Content didn't replaced
+
+One reason for that is if you put some extra spaces in your html tags. DomDocument fixes html and removes extra spaces or other things that it founds not respectful of HTML rules.
+Ex:
+
+```HTML
+<img src="myimage.png"  my-attribute="myvalue" /> <!-- will not be replaced -->
+<img src="myimage.png" my-attribute="myvalue" /> <!-- will not be replaced as there is a space at the end before /> -->
+
+<img src="myimage.png" my-attribute="myvalue"/> <!-- this is ok -->
+
+``` 

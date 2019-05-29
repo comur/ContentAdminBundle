@@ -12,6 +12,7 @@ use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
+use Symfony\Component\OptionsResolver\Options;
 
 class InlineContentType extends AbstractType
 {
@@ -19,10 +20,15 @@ class InlineContentType extends AbstractType
 
     private $locales;
 
-    public function __construct(InlineContentDataTransformer $transformer, $locales)
+    private $comurImageEnabled;
+
+    private $optionsResolver;
+
+    public function __construct(InlineContentDataTransformer $transformer, $locales, $comurImageEnabled)
     {
         $this->transformer = $transformer;
         $this->locales = $locales;
+        $this->comurImageEnabled = $comurImageEnabled;
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
@@ -35,10 +41,13 @@ class InlineContentType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
+        $this->optionsResolver = $resolver;
         $resolver->setDefaults([
             'template_field_name' => 'template',
+            'template' => null,
             'iframe_height' => 500,
-            'class' => null
+            'class' => null,
+            'comur_image_params' => array()
         ]);
     }
 
@@ -47,12 +56,28 @@ class InlineContentType extends AbstractType
      */
     public function buildView(FormView $view, FormInterface $form, array $options)
     {
+        // Mimic ComurImageBundle for this as we don't really use CroppableImageType
+        $comurImageBundleConfig = [];
+        if ($this->comurImageEnabled) {
+            $comurImageBundleConfig['comur_image_params'] = [
+                'cropConfig' => \Comur\ImageBundle\Form\Type\CroppableImageType::getCropConfigNormalizer(\Comur\ImageBundle\Form\Type\CroppableImageType::$cropConfig)(
+                    $this->optionsResolver,
+                    isset($options['comur_image_params']['cropConfig']) ? $options['comur_image_params']['cropConfig'] : array()
+                ),
+                'uploadConfig' => \Comur\ImageBundle\Form\Type\CroppableImageType::getUploadConfigNormalizer(\Comur\ImageBundle\Form\Type\CroppableImageType::$uploadConfig)(
+                    $this->optionsResolver,
+                    isset($options['comur_image_params']['uploadConfig']) ? $options['comur_image_params']['uploadConfig'] : array()
+                )
+            ];
+        }
+
         $view->vars = $view->vars + array(
                 'template_field_name' => $options['template_field_name'],
                 'iframe_height' => $options['iframe_height'],
                 'class' => $options['class'],
-                'locales' => $this->locales
-            );
+                'locales' => $this->locales,
+                'comur_image_enabled' => $this->comurImageEnabled,
+            ) + $comurImageBundleConfig;
     }
 
     public function getParent()

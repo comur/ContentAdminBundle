@@ -29,11 +29,19 @@ class InlineContent extends AbstractExtension
 
         if (count($items)) {
             foreach ($items as $item) {
-                if (isset($content[$item->attr('data-content-id')])) {
+                $contentId = $item->attr('data-content-id');
+                if (isset($content[$contentId])) {
                     // Unfortunately we cannot use dom manipulation to replace the content as it adds fragments or escapes html
-                    $default = $item->html();
-                    $value = $content[$item->attr('data-content-id')];
-                    $itemDefaultHtml = $item->__toString();
+                    // Other problem, this fixes HTML issues so replace does not work if (for eg) there are more than 1 space between 2 attributes...
+                    if (!$item->is('img')) {
+                        $default = $item->html();
+                        $value = $content[$contentId];
+                        $itemDefaultHtml = $doc->saveXml($item);
+                    } else {
+                        $default = $item->attr('src');
+                        $value = $content[$contentId];
+                        $itemDefaultHtml = $doc->saveXml($item);
+                    }
                     $itemHtml = str_replace($default, $value, $itemDefaultHtml);
                     $html = str_replace($itemDefaultHtml, $itemHtml, $html);
                 }

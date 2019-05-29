@@ -5,7 +5,7 @@ services:
 
     comur_content_admin.inline_content_type:
         class: Comur\ContentAdminBundle\Form\InlineContentType
-        arguments: ["@comur_content_admin.inline_content_data_transformer", "%comur_content_admin.locales%"]
+        arguments: ["@comur_content_admin.inline_content_data_transformer", "%comur_content_admin.locales%", "%comur_content_admin.enable_comur_image_bundle%"]
         tags:
             - { name: form.type }
 
