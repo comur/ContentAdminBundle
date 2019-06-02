@@ -59,13 +59,15 @@
             CKEDITOR.dtd.$editable.a = 1;
             CKEDITOR.disableAutoInline = true;
             CKEDITOR.config.removeButtons = 'Image';
+
             $('[data-content-id]').each(function(idx, el) {
               const tagName = $(el)[0].tagName;
+
               {% if enableComurImageBundle %}
               if (tagName === 'IMG') {
                 const id = 'image_preview_image_' + $(el).data('content-id');
                 $(el).attr('id', id);
-                const btn = $("<button class='btn btn-success'><i class='fa fa-pencil'></i> Edit</button>");
+                const btn = $("<button class='btn btn-sm btn-success'><i class='fa fa-pencil'></i></button>");
                 const data = $(el).data();
                 // const comurImageData =  {
                 //   "uploadConfig": {
@@ -134,11 +136,9 @@
 
                 btn.css({
                   'position': 'absolute',
-                  'margin': '10px',
-                  'right': '10px'
+                  'margin': '10px'
                 });
                 $(el).parent().prepend(btn)
-                return false;
               }
               {% endif %}
               if (tagName !== 'IMG') {
