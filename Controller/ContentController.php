@@ -8,13 +8,26 @@ use Symfony\Component\HttpFoundation\Request;
 class ContentController extends AbstractController
 {
     public function contentEditor(Request $request) {
+        $templates = $this->container->getParameter('comur_content_admin.templates');
         $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
             'template' => $request->query->get('template')
         ));
 
+        $templateConfig = null;
+
+        if ($templates && count($templates)) {
+            foreach ($templates as $template) {
+                if ($template['template'] === $request->query->get('template')) {
+                    $templateConfig = $template;
+                    break;
+                }
+            }
+        }
+
         return $this->render('@ComurContentAdmin/page_editor.html.twig', array(
             'template' => $request->query->get('template'),
-            'content' => $content && $content->getContent($request->query->get('locale')) ? $content->getContent($request->query->get('locale')) : array()
+            'templateConfig' => $templateConfig,
+            'content' => $content && $content->getContent($request->query->get('locale')) ? $content->getContent($request->query->get('locale')) : array(),
         ));
     }
 }

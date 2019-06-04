@@ -47,7 +47,8 @@ class InlineContentType extends AbstractType
             'template' => null,
             'iframe_height' => 500,
             'class' => null,
-            'comur_image_params' => array()
+            'comur_image_params' => array(),
+            'locales' => null
         ]);
     }
 
@@ -75,7 +76,7 @@ class InlineContentType extends AbstractType
                 'template_field_name' => $options['template_field_name'],
                 'iframe_height' => $options['iframe_height'],
                 'class' => $options['class'],
-                'locales' => $this->locales,
+                'locales' => $options['locales'] ?: $this->locales,
                 'comur_image_enabled' => $this->comurImageEnabled,
             ) + $comurImageBundleConfig;
     }

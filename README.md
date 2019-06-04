@@ -75,6 +75,12 @@ You can configure following parameters by creating a comur_content_admin.yaml in
 
 comur_content_admin:
     locales: ['en'] # this will add as many translation tabs as the number of locales when rendering content editing field
+    templates: # optional template parameters 
+        -   template: 'sections/developers/login.html.twig'
+            controller: 'App\Controller\PageController::index' # Use controller instead of template (need anyway a template field to match and get controller parameter)
+            controllerParams:
+                pageId: '123'
+                #...
 ```
 
 Ex: screenshot of multilingual admin
