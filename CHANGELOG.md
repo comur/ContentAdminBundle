@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.5](https://github.com/comur/ContentAdminBundle/tree/0.0.5) (2019-06-11)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.4...0.0.5)
+
+**Fixed bugs:**
+
+- Cannot edit in some cases [\#5](https://github.com/comur/ContentAdminBundle/issues/5)
+
 ## [0.0.4](https://github.com/comur/ContentAdminBundle/tree/0.0.4) (2019-06-04)
 [Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.3...0.0.4)
 
