@@ -35,8 +35,6 @@
           function loadIframe(template) {
             {% for locale in locales %}
                 if (template) {
-                  $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}`)
-                  $('comurContentAdminContainer_{{ locale }}').show();
                   $('#comurContentAdminIframe_{{ locale }}').on('load', function(){
                     sendMessage(JSON.stringify({
                       action: 'loadEditor'
@@ -51,6 +49,8 @@
                       }
                     }
                   });
+                  $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}`)
+                  $('comurContentAdminContainer_{{ locale }}').show();
                 } else {
                   $('#comurContentAdminContainer').hide();
                 }
