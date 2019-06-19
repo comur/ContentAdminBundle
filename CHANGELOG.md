@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.6](https://github.com/comur/ContentAdminBundle/tree/0.0.6) (2019-06-19)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.5...0.0.6)
+
+**Closed issues:**
+
+- No editor on some browsers [\#6](https://github.com/comur/ContentAdminBundle/issues/6)
+
 ## [0.0.5](https://github.com/comur/ContentAdminBundle/tree/0.0.5) (2019-06-11)
 [Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.4...0.0.5)
 
