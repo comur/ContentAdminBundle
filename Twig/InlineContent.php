@@ -6,7 +6,7 @@ namespace Comur\ContentAdminBundle\Twig;
 use Symfony\Component\Filesystem\Filesystem;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
-use DOMWrap\Document;
+//use DOMWrap\Document;
 
 class InlineContent extends AbstractExtension
 {
@@ -17,7 +17,8 @@ class InlineContent extends AbstractExtension
         ];
     }
 
-    public function replaceContent($html, $content = null)
+    /* NOT USED ANYMORE AS THERE IS A BUG IN THIS PACKAGE
+    public function replaceContentOld($html, $content = null)
     {
         if (!$content) {
             return $html;
@@ -37,16 +38,45 @@ class InlineContent extends AbstractExtension
                         $default = $item->html();
                         $value = $content[$contentId];
                         $itemDefaultHtml = $doc->saveXml($item);
+                        if ($item->is('span') || $item->is('p') || $item->is('h')) {
+                            $item->html($content[$contentId]);
+                        } else {
+                            $item->html($content[$contentId]);
+                        }
                     } else {
                         $default = $item->attr('src');
                         $value = $content[$contentId];
                         $itemDefaultHtml = $doc->saveXml($item);
+                        $item->attr('src', $content[$contentId]);
                     }
-                    $itemHtml = str_replace($default, $value, $itemDefaultHtml);
-                    $html = str_replace($itemDefaultHtml, $itemHtml, $html);
+//                    $itemHtml = str_replace($default, $value, $itemDefaultHtml);
+//                    $html = str_replace($itemDefaultHtml, $itemHtml, $html);
                 }
             }
         }
-        return $html;
+        return implode("\n", array_map(function($item) use ($doc) { return $doc->saveXML($item); }, $doc->find('body')->children()->toArray()));
+    }
+    */
+
+    public function replaceContent($html, $content = null)
+    {
+        if (!$content) return $html;
+
+        $doc = str_get_html($html);
+        $items = $doc->find('[data-content-id]');
+
+        if (count($items)) {
+            foreach ($items as $item) {
+                $contentId = $item->getAttribute('data-content-id');
+                if (isset($content[$contentId])) {
+                    if ($item->tag !== 'img') {
+                        $item->innertext = $content[$contentId];
+                    } else {
+                        $item->src = $content[$contentId];
+                    }
+                }
+            }
+        }
+        return $doc->save();
     }
 }

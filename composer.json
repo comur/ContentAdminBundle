@@ -1,9 +1,9 @@
 {
   "name": "comur/content-admin-bundle",
   "type": "symfony-bundle",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Lets you add a symfony form field with a visual inline editor for all your templates with CKEditor",
-  "keywords": ["admin", "symfony", "ckeditor", "inline", "content", "cms", "edit", "cmf", "page", "sonata"],
+  "keywords": ["admin", "symfony", "ckeditor", "inline", "content", "cms", "edit", "cmf", "page", "sonata", "html", "twig"],
   "homepage": "https://github.com/comur/content-admin-bundle",
   "license": "MIT",
   "authors": [
@@ -22,8 +22,7 @@
     "symfony/twig-bundle": ">=3.4",
     "symfony/validator": ">=3.4",
     "symfony/yaml": ">=3.4",
-    "paquettg/php-html-parser": "^2.0.2",
-    "ext-dom": "*",
+    "emanueleminotto/simple-html-dom": "*",
     "ext-json": "*"
   },
   "require-dev": {
