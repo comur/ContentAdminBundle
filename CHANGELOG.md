@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.7](https://github.com/comur/ContentAdminBundle/tree/0.0.7) (2019-06-28)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.6...0.0.7)
+
+**Implemented enhancements:**
+
+- Better dom manipulation in twig extension [\#4](https://github.com/comur/ContentAdminBundle/issues/4)
+
 ## [0.0.6](https://github.com/comur/ContentAdminBundle/tree/0.0.6) (2019-06-19)
 [Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.5...0.0.6)
 
