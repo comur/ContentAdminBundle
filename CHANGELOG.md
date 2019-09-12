@@ -1,5 +1,12 @@
 # Change Log
 
+## [0.0.8](https://github.com/comur/ContentAdminBundle/tree/0.0.8) (2019-09-12)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.7...0.0.8)
+
+**Fixed bugs:**
+
+- load ck editor called multiple times [\#7](https://github.com/comur/ContentAdminBundle/issues/7)
+
 ## [0.0.7](https://github.com/comur/ContentAdminBundle/tree/0.0.7) (2019-06-28)
 [Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.6...0.0.7)
 
