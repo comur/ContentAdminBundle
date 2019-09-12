@@ -54,8 +54,11 @@
 
       // Listen to messages from parent window
       bindEvent(window, 'message', function (e) {
-        const data = JSON.parse(e.data);
-        const action = data.action;
+        if (typeof e.data !== 'string' || !e.data) return false;
+
+        const messageData = JSON.parse(e.data);
+
+        const action = messageData.action;
         switch (action) {
           case 'loadEditor':
             $('a').on('click', function(e){
@@ -168,10 +171,10 @@
             }
             break;
           case 'updateImage':
-            if (data.data && data.data.src && data.data.contentId) {
-              const el = $(`[data-content-id=${data.data.contentId}]`);
+            if (messageData.data && messageData.data.src && messageData.data.contentId) {
+              const el = $(`[data-content-id=${messageData.data.contentId}]`);
               if (el) {
-                el.attr('src', data.data.src);
+                el.attr('src', messageData.data.src);
               }
             }
             break;

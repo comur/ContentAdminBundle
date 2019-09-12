@@ -32,27 +32,29 @@
         <script>
           const data = {{ form.vars.value ? form.vars.value|raw : '{}' }};
 
+          {% for locale in locales %}
+            $('#comurContentAdminIframe_{{ locale }}').on('load', function(){
+              document.getElementById('comurContentAdminIframe_{{ locale }}').contentWindow.onunload = function(){
+                return false;
+                // console.log('unload')
+                if (navigator.appName == 'Microsoft Internet Explorer') {
+                  document.getElementById('comurContentAdminIframe_{{ locale }}').document.execCommand('Stop');
+                } else {
+                  document.getElementById('comurContentAdminIframe_{{ locale }}').stop();
+                }
+              }
+              // Need timeout on some browsers...
+              setTimeout(function(){
+                sendMessage(JSON.stringify({
+                  action: 'loadEditor'
+                }), '{{ locale }}');
+              }, 500);
+            });
+          {% endfor %}
+
           function loadIframe(template) {
             {% for locale in locales %}
                 if (template) {
-                  $('#comurContentAdminIframe_{{ locale }}').on('load', function(){
-                    document.getElementById('comurContentAdminIframe_{{ locale }}').contentWindow.onunload = function(){
-                      return false;
-                      // console.log('unload')
-                      if (navigator.appName == 'Microsoft Internet Explorer') {
-                        document.getElementById('comurContentAdminIframe_{{ locale }}').document.execCommand('Stop');
-                      } else {
-                        document.getElementById('comurContentAdminIframe_{{ locale }}').stop();
-                      }
-                    }
-
-                    // Need timeout on some browsers...
-                    setTimeout(function(){
-                        sendMessage(JSON.stringify({
-                          action: 'loadEditor'
-                        }), '{{ locale }}');
-                    }, 500);
-                  });
                   $('comurContentAdminContainer_{{ locale }}').show();
                   // Need timeout on some browsers...
                   setTimeout(function(){
