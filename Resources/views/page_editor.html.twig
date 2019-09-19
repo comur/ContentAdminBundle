@@ -77,7 +77,8 @@
               if (tagName === 'IMG') {
                 const id = 'image_preview_image_' + $(el).data('content-id');
                 $(el).attr('id', id);
-                const btn = $("<button class='btn btn-sm btn-success'><i class='fa fa-pencil'></i></button>");
+                const imgBtn = $("<button class='btn btn-sm btn-success'><i class='fa fa-pencil'></i></button>");
+                const altBtn = $("<button class='btn btn-sm btn-"+($(el).attr('alt') && $(el).attr('alt').length > 0 ? 'warning' : 'danger')+"'>alt</button>")
                 const data = $(el).data();
                 // const comurImageData =  {
                 //   "uploadConfig": {
@@ -133,7 +134,7 @@
                 }
 
                 // Ask parent to show ComurImageBundle to update image
-                btn.on('click', function(){
+                imgBtn.on('click', function(){
                   const data = {
                     id: $(el).data('content-id'),
                     // value: this.getData(),
@@ -143,13 +144,52 @@
                   };
                   sendMessage(JSON.stringify(data));
                 });
-
-                btn.css({
+                const css = {
                   'position': 'absolute',
                   'margin': '10px',
-                  'z-index': 1000
+                  'z-index': 1000,
+                  'height': '30px'
+                };
+                imgBtn.css(css);
+                $(el).parent().prepend(imgBtn);
+
+                css['marginLeft'] = '50px';
+                altBtn.css(css);
+
+                const altField = $("<div id='"+$(el).data('content-id')+"AltContainer'><input type='text' id='"+$(el).data('content-id')+"Alt' name='"+$(el).data('content-id')+"Alt' /><button class='btn btn-success btn-sm'><i class='fa fa-check'></i></button></div>")
+                css['display'] = 'none';
+                altField.css(css);
+                altField.find('input').val($(el).attr('alt'));
+
+                altBtn.on('click', function(){
+                  const altEl = $('#'+$(el).data('content-id')+'AltContainer');
+                  if (altEl.is(":visible")) {
+                    altEl.hide();
+                    altBtn.show();
+                  } else {
+                    altBtn.hide();
+                    altEl.show();
+                    altEl.css({display: 'inline'});
+                  }
                 });
-                $(el).parent().prepend(btn)
+
+                altField.find('button').on('click', function(){
+                  const value = $("#"+$(el).data('content-id')+"Alt").val();
+                  const data = {
+                    id: $(el).data('content-id')+"Alt",
+                    value: value,
+                    locale: '{{ app.request.query.get('locale') }}'
+                  };
+                  sendMessage(JSON.stringify(data));
+                  $(this).parent().hide();
+                  altBtn.show();
+                  altBtn.removeClass('btn-warning');
+                  altBtn.removeClass('btn-danger');
+                  altBtn.addClass('btn-'+(value.length > 0 ? 'warning' : 'danger'))
+                });
+
+                $(el).parent().prepend(altField);
+                $(el).parent().prepend(altBtn);
               }
               {% endif %}
               if (tagName !== 'IMG') {
