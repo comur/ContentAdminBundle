@@ -69,6 +69,11 @@
             CKEDITOR.dtd.$editable.a = 1;
             CKEDITOR.disableAutoInline = true;
             CKEDITOR.config.removeButtons = 'Image';
+            CKEDITOR.dtd.$editable.ul = 1;
+            CKEDITOR.dtd.$editable.i = 1;
+            CKEDITOR.dtd.$editable.li = 1;
+            CKEDITOR.dtd.$editable.span = 1;
+            CKEDITOR.dtd.$editable.td = 1;
 
             $('[data-content-id]').each(function(idx, el) {
               const tagName = $(el)[0].tagName;
@@ -131,6 +136,10 @@
                   comurImageData['cropConfig']['minWidth'] = $(el).attr('width');
                   comurImageData['cropConfig']['minHeight'] = $(el).attr('height');
                   comurImageData['cropConfig']['forceResize'] = true;
+                } else {
+                  comurImageData['cropConfig']['minWidth'] = $(el).width();
+                  comurImageData['cropConfig']['minHeight'] = $(el).height();
+                  comurImageData['cropConfig']['forceResize'] = typeof data['force-resize'] !== 'undefined' && data['force-resize'];
                 }
 
                 // Ask parent to show ComurImageBundle to update image

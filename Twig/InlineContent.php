@@ -72,7 +72,6 @@ class InlineContent extends AbstractExtension
                     if ($item->tag !== 'img') {
                         $item->innertext = $content[$contentId];
                     } else {
-                        dump($content, $contentId);exit;
                         $item->src = $content[$contentId];
                     }
                 }
