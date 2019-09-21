@@ -14,6 +14,7 @@ class Configuration implements ConfigurationInterface
 
         $treeBuilder->getRootNode()
             ->children()
+                ->scalarNode('templates_parameter')->defaultValue('comur_content_admin.templates')->end()
                 ->arrayNode('locales')
                     ->prototype('scalar')
                     ->defaultValue(['en'])

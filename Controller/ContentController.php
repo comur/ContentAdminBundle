@@ -8,7 +8,9 @@ use Symfony\Component\HttpFoundation\Request;
 class ContentController extends AbstractController
 {
     public function contentEditor(Request $request) {
-        $templates = $this->container->getParameter('comur_content_admin.templates');
+        $templatesParam = $this->container->getParameter('comur_content_admin.templates_parameter');
+        $templates = $this->container->getParameter($templatesParam);
+
         $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
             'template' => $request->query->get('template')
         ));
