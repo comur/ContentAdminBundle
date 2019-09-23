@@ -27,6 +27,7 @@ class ComurContentAdminExtension extends Extension implements PrependExtensionIn
         $container->setParameter('comur_content_admin.enable_comur_image_bundle', $config['enable_comur_image_bundle']);
         $container->setParameter('comur_content_admin.templates', $config['templates']);
         $container->setParameter('comur_content_admin.templates_parameter', $config['templates_parameter']);
+        $container->setParameter('comur_content_admin.entity_name', $config['entity_name']);
     }
 
     /* to add some parameters in case of ComurImageBundle is enabled */

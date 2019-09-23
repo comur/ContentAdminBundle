@@ -58,7 +58,7 @@
                   $('comurContentAdminContainer_{{ locale }}').show();
                   // Need timeout on some browsers...
                   setTimeout(function(){
-                    $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}`)
+                    $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}&entityid={{ object is defined and object ? object.id : '' }}`)
                   }, 500);
                 } else {
                   $('#comurContentAdminContainer').hide();

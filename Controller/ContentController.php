@@ -11,9 +11,15 @@ class ContentController extends AbstractController
         $templatesParam = $this->container->getParameter('comur_content_admin.templates_parameter');
         $templates = $this->container->getParameter($templatesParam);
 
-        $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
-            'template' => $request->query->get('template')
-        ));
+        if ($request->query->has('entityid') && $request->query->get('entityid')) {
+            $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
+                'id' => $request->query->get('entityid')
+            ));
+        } else {
+            $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
+                'template' => $request->query->get('template')
+            ));
+        }
 
         $templateConfig = null;
 
@@ -30,6 +36,7 @@ class ContentController extends AbstractController
             'template' => $request->query->get('template'),
             'templateConfig' => $templateConfig,
             'content' => $content && $content->getContent($request->query->get('locale')) ? $content->getContent($request->query->get('locale')) : array(),
+            $this->container->getParameter('comur_content_admin.entity_name') => $content
         ));
     }
 }

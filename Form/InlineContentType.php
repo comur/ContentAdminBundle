@@ -72,12 +72,14 @@ class InlineContentType extends AbstractType
             ];
         }
 
+
         $view->vars = $view->vars + array(
                 'template_field_name' => $options['template_field_name'],
                 'iframe_height' => $options['iframe_height'],
                 'class' => $options['class'],
                 'locales' => $options['locales'] ?: $this->locales,
                 'comur_image_enabled' => $this->comurImageEnabled,
+                'object' => $form->getParent()->getData()
             ) + $comurImageBundleConfig;
     }
 
