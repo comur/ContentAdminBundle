@@ -1,5 +1,25 @@
 # Change Log
 
+## [0.0.13](https://github.com/comur/ContentAdminBundle/tree/0.0.13) (2019-09-23)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.12...0.0.13)
+
+**Fixed bugs:**
+
+- Conflict between 2 entity with same template [\#10](https://github.com/comur/ContentAdminBundle/issues/10)
+
+## [0.0.12](https://github.com/comur/ContentAdminBundle/tree/0.0.12) (2019-09-21)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.11...0.0.12)
+
+**Closed issues:**
+
+- insert templates from another parameter [\#9](https://github.com/comur/ContentAdminBundle/issues/9)
+
+## [0.0.11](https://github.com/comur/ContentAdminBundle/tree/0.0.11) (2019-09-20)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.10...0.0.11)
+
+## [0.0.10](https://github.com/comur/ContentAdminBundle/tree/0.0.10) (2019-09-19)
+[Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.9...0.0.10)
+
 ## [0.0.9](https://github.com/comur/ContentAdminBundle/tree/0.0.9) (2019-09-19)
 [Full Changelog](https://github.com/comur/ContentAdminBundle/compare/0.0.8...0.0.9)
 
