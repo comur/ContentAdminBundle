@@ -66,6 +66,8 @@
               return false;
             });
             parentUrl = e.origin;
+            // CKEDITOR.config.allowedContent = true;
+            CKEDITOR.config.extraAllowedContent = '*(*);*{*}';
             CKEDITOR.dtd.$editable.a = 1;
             CKEDITOR.disableAutoInline = true;
             CKEDITOR.config.removeButtons = 'Image';
