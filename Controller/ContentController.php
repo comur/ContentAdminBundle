@@ -11,6 +11,8 @@ class ContentController extends AbstractController
         $templatesParam = $this->container->getParameter('comur_content_admin.templates_parameter');
         $templates = $this->container->getParameter($templatesParam);
 
+        $request->setLocale($request->query->get('locale'));
+
         if ($request->query->has('entityid') && $request->query->get('entityid')) {
             $content = $this->getDoctrine()->getManager()->getRepository($request->query->get('class'))->findOneBy(array(
                 'id' => $request->query->get('entityid')
