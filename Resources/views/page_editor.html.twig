@@ -143,6 +143,13 @@
                   comurImageData['cropConfig']['forceResize'] = true; //typeof data['force-resize'] !== 'undefined' && data['force-resize'];
                 }
 
+                const imagePosition = {
+                  top: $(el)[0].offsetTop,
+                  left: $(el)[0].offsetLeft,
+                  right: $(el).parent()[0].offsetWidth - $(el)[0].offsetWidth - ($(el)[0].offsetLeft),
+                };
+
+
                 // Ask parent to show ComurImageBundle to update image
                 imgBtn.on('click', function(){
                   const data = {
@@ -158,7 +165,9 @@
                   'position': 'absolute',
                   'margin': '10px',
                   'z-index': 1000,
-                  'height': '30px'
+                  'height': '30px',
+                  'top': imagePosition.top+'px',
+                  'left': imagePosition.left
                 };
                 imgBtn.css(css);
                 $(el).parent().prepend(imgBtn);
@@ -197,6 +206,11 @@
                   altBtn.removeClass('btn-danger');
                   altBtn.addClass('btn-'+(value.length > 0 ? 'warning' : 'danger'))
                 });
+
+                {% if showImageSize is defined and showImageSize %}
+                  const imageSize = $("<div style='background-color: #555555; padding: 5px; color: white; position: absolute; top: "+imagePosition.top+"px;right: "+imagePosition.right+"px;'>"+comurImageData['cropConfig']['minWidth']+' x '+comurImageData['cropConfig']['minHeight']+"</div>")
+                  $(el).parent().prepend(imageSize);
+                {% endif %}
 
                 $(el).parent().prepend(altField);
                 $(el).parent().prepend(altBtn);

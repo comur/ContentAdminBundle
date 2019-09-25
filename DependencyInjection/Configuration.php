@@ -37,6 +37,9 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('enable_comur_image_bundle')
                     ->defaultFalse()
                 ->end()
+                ->booleanNode('show_image_size')
+                    ->defaultTrue()
+                ->end()
             ->end()
         ;
 

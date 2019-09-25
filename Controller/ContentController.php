@@ -38,7 +38,8 @@ class ContentController extends AbstractController
             'template' => $request->query->get('template'),
             'templateConfig' => $templateConfig,
             'content' => $content && $content->getContent($request->query->get('locale')) ? $content->getContent($request->query->get('locale')) : array(),
-            $this->container->getParameter('comur_content_admin.entity_name') => $content
+            $this->container->getParameter('comur_content_admin.entity_name') => $content,
+            'showImageSize' => $this->container->getParameter('comur_content_admin.show_image_size')
         ));
     }
 }
