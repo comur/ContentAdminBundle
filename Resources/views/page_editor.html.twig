@@ -134,14 +134,13 @@
                 }
 
                 // Force to fit the exact size of the image if width and height are given
+                comurImageData['cropConfig']['minWidth'] = typeof $(el)[0].naturalWidth !== 'undefined' ? $(el)[0].naturalWidth : $(el).width();
+                comurImageData['cropConfig']['minHeight'] = typeof $(el)[0].naturalHeight !== 'undefined' ? $(el)[0].naturalHeight : $(el).height();
+
                 if ($(el).attr('width') && $(el).attr('height')) {
-                  comurImageData['cropConfig']['minWidth'] = $(el).attr('width');
-                  comurImageData['cropConfig']['minHeight'] = $(el).attr('height');
-                  comurImageData['cropConfig']['forceResize'] = true;
+                  comurImageData['cropConfig']['forceResize'] = typeof $(el)[0].naturalWidth !== 'undefined';
                 } else {
-                  comurImageData['cropConfig']['minWidth'] = $(el).width();
-                  comurImageData['cropConfig']['minHeight'] = $(el).height();
-                  comurImageData['cropConfig']['forceResize'] = typeof data['force-resize'] !== 'undefined' && data['force-resize'];
+                  comurImageData['cropConfig']['forceResize'] = true; //typeof data['force-resize'] !== 'undefined' && data['force-resize'];
                 }
 
                 // Ask parent to show ComurImageBundle to update image
