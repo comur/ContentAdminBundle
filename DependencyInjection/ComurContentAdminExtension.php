@@ -29,6 +29,7 @@ class ComurContentAdminExtension extends Extension implements PrependExtensionIn
         $container->setParameter('comur_content_admin.templates_parameter', $config['templates_parameter']);
         $container->setParameter('comur_content_admin.entity_name', $config['entity_name']);
         $container->setParameter('comur_content_admin.show_image_size', $config['show_image_size']);
+        $container->setParameter('comur_content_admin.editable_tags', $config['editable_tags']);
     }
 
     /* to add some parameters in case of ComurImageBundle is enabled */
@@ -54,6 +55,11 @@ class ComurContentAdminExtension extends Extension implements PrependExtensionIn
             ));
 
         }
+        $container->prependExtensionConfig('twig', array(
+            'globals' => array(
+                'comurEditableTags' => array_combine($config['editable_tags'], array_fill(0, count($config['editable_tags']), 1))
+            )
+        ));
 
         // Add theme in form themes of twig
 

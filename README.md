@@ -77,6 +77,7 @@ comur_content_admin:
     locales: ['en'] # this will add as many translation tabs as the number of locales when rendering content editing field
     templates_parameter: 'my_templates' # (optional) if you use this parameter, the bundle will use this parameter name as templates parameter and try to get templates using this parameter name
     entity_name: 'page' # (optional) a page parameter is passed to all templates when editing in backend (except if entity is not persisted yet)
+    editable_tags: ['li', 'ul', 'td', 'th', 'i', 'span'] # (optional) use this parameter to set editable tags list for CKEditor, see: https://ckeditor.com/docs/ckeditor4/latest/api/CKEDITOR_dtd.html#property-S-editable
     templates: # optional template parameters 
         -   template: 'sections/developers/login.html.twig'
             controller: 'App\Controller\PageController::index' # Use controller instead of template (need anyway a template field to match and get controller parameter)

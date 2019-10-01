@@ -71,11 +71,13 @@
             CKEDITOR.dtd.$editable.a = 1;
             CKEDITOR.disableAutoInline = true;
             CKEDITOR.config.removeButtons = 'Image';
-            CKEDITOR.dtd.$editable.ul = 1;
-            CKEDITOR.dtd.$editable.i = 1;
-            CKEDITOR.dtd.$editable.li = 1;
-            CKEDITOR.dtd.$editable.span = 1;
-            CKEDITOR.dtd.$editable.td = 1;
+            Object.assign(CKEDITOR.dtd.$editable, {{ comurEditableTags|json_encode|raw }})
+            // CKEDITOR.dtd.$editable.ul = 1;
+            // CKEDITOR.dtd.$editable.i = 1;
+            // CKEDITOR.dtd.$editable.li = 1;
+            // CKEDITOR.dtd.$editable.span = 1;
+            // CKEDITOR.dtd.$editable.td = 1;
+            // CKEDITOR.dtd.$editable.th = 1;
 
             $('[data-content-id]').each(function(idx, el) {
               const tagName = $(el)[0].tagName;
@@ -149,7 +151,6 @@
                   right: $(el).parent()[0].offsetWidth - $(el)[0].offsetWidth - ($(el)[0].offsetLeft),
                 };
 
-
                 // Ask parent to show ComurImageBundle to update image
                 imgBtn.on('click', function(){
                   const data = {
@@ -208,7 +209,7 @@
                 });
 
                 {% if showImageSize is defined and showImageSize %}
-                  const imageSize = $("<div style='background-color: #555555; padding: 5px; color: white; position: absolute; top: "+imagePosition.top+"px;right: "+imagePosition.right+"px;'>"+comurImageData['cropConfig']['minWidth']+' x '+comurImageData['cropConfig']['minHeight']+"</div>")
+                  const imageSize = $("<div style='font-size: 12px;background-color: #555555; padding: 5px; color: white; position: absolute; top: "+imagePosition.top+"px;right: "+imagePosition.right+"px;'>"+comurImageData['cropConfig']['minWidth']+' x '+comurImageData['cropConfig']['minHeight']+"</div>")
                   $(el).parent().prepend(imageSize);
                 {% endif %}
 

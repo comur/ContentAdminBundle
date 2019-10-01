@@ -37,6 +37,18 @@ class Configuration implements ConfigurationInterface
                 ->booleanNode('enable_comur_image_bundle')
                     ->defaultFalse()
                 ->end()
+                ->arrayNode('editable_tags')
+                    ->prototype('scalar')
+                    ->defaultValue([
+                        'ul',
+                        'i',
+                        'li',
+                        'span',
+                        'td',
+                        'th'
+                    ])
+                    ->end()
+                ->end()
                 ->booleanNode('show_image_size')
                     ->defaultTrue()
                 ->end()
