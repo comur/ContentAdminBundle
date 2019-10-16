@@ -13,7 +13,7 @@
   {% include template %}
 {% endif %}
 
-<script src="https://cdn.ckeditor.com/4.12.0/standard/ckeditor.js"></script>
+<script src="https://cdn.ckeditor.com/4.13.0/standard/ckeditor.js"></script>
 
 {% if enableComurImageBundle %}
 {% include "ComurImageBundle:Form:croppable_image_modal.html.twig" with {'include_jquery': false, 'include_bootstrap': false} %}
@@ -52,6 +52,193 @@
         return s.charAt(0).toLowerCase() + s.slice(1);
       }
 
+      function loadEditors(e) {
+        $('html, body').css({
+          'height': 'auto'
+        });
+        $('a').on('click', function(e){
+          e.preventDefault();
+          return false;
+        });
+        parentUrl = e.origin;
+        // CKEDITOR.config.allowedContent = true;
+        CKEDITOR.config.extraAllowedContent = '*(*);*{*}';
+        CKEDITOR.dtd.$editable.a = 1;
+        CKEDITOR.disableAutoInline = true;
+        CKEDITOR.config.removeButtons = 'Image;Anchor';
+        CKEDITOR.config.forcePasteAsPlainText = true;
+        delete CKEDITOR.dtd.$removeEmpty.a;
+        Object.assign(CKEDITOR.dtd.$editable, {{ comurEditableTags|json_encode|raw }});
+        // CKEDITOR.dtd.$editable.ul = 1;
+        // CKEDITOR.dtd.$editable.i = 1;
+        // CKEDITOR.dtd.$editable.li = 1;
+        // CKEDITOR.dtd.$editable.span = 1;
+        // CKEDITOR.dtd.$editable.td = 1;
+        // CKEDITOR.dtd.$editable.th = 1;
+
+        $('[data-content-id]').each(function(idx, el) {
+          const tagName = $(el)[0].tagName;
+
+          {% if enableComurImageBundle %}
+          if (tagName === 'IMG') {
+            const id = 'image_preview_image_' + $(el).data('content-id');
+            $(el).attr('id', id);
+            const imgBtn = $("<button class='btn btn-sm btn-success' style='width: 30px !important;padding: 5px;'><i class='fa fa-pencil'></i></button>");
+            const altBtn = $("<button class='btn btn-sm btn-"+($(el).attr('alt') && $(el).attr('alt').length > 0 ? 'warning' : 'danger')+"' style='width: 30px !important;padding: 5px;'>alt</button>")
+            const data = $(el).data();
+            // const comurImageData =  {
+            //   "uploadConfig": {
+            //     "uploadRoute":"comur_api_upload",
+            //     // "uploadUrl":"/app/public/uploads/pages/",
+            //     // "webDir":"uploads/pages",
+            //     "fileExt":"*.jpg;*.gif;*.png;*.jpeg",
+            //     // "libraryDir":"/app/public/uploads/pages/",
+            //     "libraryRoute":"comur_api_image_library",
+            //     "showLibrary":true,
+            //     "saveOriginal":false,
+            //     "generateFilename":true
+            //   },
+            //   "cropConfig": {
+            //     "minWidth":1200,
+            //     "minHeight":630,
+            //     "aspectRatio":true,
+            //     "cropRoute":"comur_api_crop",
+            //     "forceResize":true,
+            //     // "thumbs":[{
+            //     //   "maxWidth":600,
+            //     //   "maxHeight":300,
+            //     //   "useAsFieldImage":true
+            //     // }]
+            //   },
+            //   // "fieldImage": {
+            //   //   "maxWidth":600,
+            //   //   "maxHeight":300,
+            //   //   "useAsFieldImage":true
+            //   // }
+            // };
+            const comurImageData = {
+              cropConfig: {},
+              uploadConfig: {}
+            };
+            for(let d in data) {
+              if (d.indexOf('imageCrop') > -1) {
+                comurImageData['cropConfig'][firstLetterLower(d.replace('imageCrop', ''))] = data[d];
+              }
+              if (d.indexOf('imageUpload') > -1) {
+                comurImageData['uploadConfig'][firstLetterLower(d.replace('imageUpload', ''))] = data[d];
+              }
+            }
+
+            // Force to fit the exact size of the image if width and height are given
+            comurImageData['cropConfig']['minWidth'] = typeof $(el)[0].naturalWidth !== 'undefined' ? $(el)[0].naturalWidth : $(el).width();
+            comurImageData['cropConfig']['minHeight'] = typeof $(el)[0].naturalHeight !== 'undefined' ? $(el)[0].naturalHeight : $(el).height();
+
+            if ($(el).attr('width') && $(el).attr('height')) {
+              comurImageData['cropConfig']['forceResize'] = typeof $(el)[0].naturalWidth !== 'undefined';
+            } else {
+              comurImageData['cropConfig']['forceResize'] = true; //typeof data['force-resize'] !== 'undefined' && data['force-resize'];
+            }
+
+            const imagePosition = {
+              top: $(el)[0].offsetTop,
+              left: $(el)[0].offsetLeft,
+              right: $(el).parent()[0].offsetWidth - $(el)[0].offsetWidth - ($(el)[0].offsetLeft),
+            };
+
+            // Ask parent to show ComurImageBundle to update image
+            imgBtn.on('click', function(){
+              const data = {
+                id: $(el).data('content-id'),
+                // value: this.getData(),
+                locale: '{{ app.request.query.get('locale') }}',
+                request: 'getImage',
+                comurImageData: comurImageData
+              };
+              sendMessage(JSON.stringify(data));
+            });
+            const css = {
+              'position': 'absolute',
+              'margin': '10px',
+              'z-index': 1000,
+              'height': '30px',
+              'top': imagePosition.top+'px',
+              'left': imagePosition.left
+            };
+            imgBtn.css(css);
+            $(el).parent().prepend(imgBtn);
+
+            css['marginLeft'] = '50px';
+            altBtn.css(css);
+
+            const altField = $("<div id='"+$(el).data('content-id')+"AltContainer'><input type='text' id='"+$(el).data('content-id')+"Alt' name='"+$(el).data('content-id')+"Alt' /><button class='btn btn-success btn-sm' style='width: 30px !important;padding: 5px;'><i class='fa fa-check'></i></button></div>")
+            css['display'] = 'none';
+            altField.css(css);
+            altField.find('input').val($(el).attr('alt'));
+
+            altBtn.on('click', function(){
+              const altEl = $('#'+$(el).data('content-id')+'AltContainer');
+              if (altEl.is(":visible")) {
+                altEl.hide();
+                altBtn.show();
+              } else {
+                altBtn.hide();
+                altEl.show();
+                altEl.css({display: 'inline'});
+              }
+            });
+
+            altField.find('button').on('click', function(){
+              const value = $("#"+$(el).data('content-id')+"Alt").val();
+              const data = {
+                id: $(el).data('content-id')+"Alt",
+                value: value,
+                locale: '{{ app.request.query.get('locale') }}'
+              };
+              sendMessage(JSON.stringify(data));
+              $(this).parent().hide();
+              altBtn.show();
+              altBtn.removeClass('btn-warning');
+              altBtn.removeClass('btn-danger');
+              altBtn.addClass('btn-'+(value.length > 0 ? 'warning' : 'danger'))
+            });
+
+            {% if showImageSize is defined and showImageSize %}
+            const imageSize = $("<div style='font-size: 12px;background-color: #555555; padding: 5px; color: white; position: absolute; top: "+imagePosition.top+"px;right: "+imagePosition.right+"px;'>"+comurImageData['cropConfig']['minWidth']+' x '+comurImageData['cropConfig']['minHeight']+"</div>")
+            $(el).parent().prepend(imageSize);
+            {% endif %}
+
+            $(el).parent().prepend(altField);
+            $(el).parent().prepend(altBtn);
+          }
+          {% endif %}
+          if (tagName !== 'IMG') {
+            $(el).attr('contenteditable', true);
+            CKEDITOR.inline(el, {
+              removeButtons: 'Image'
+            });
+          }
+        });
+        for (var i in CKEDITOR.instances) {
+          CKEDITOR.instances[i].on('change', function(evt) {
+            const data = {
+              id: $(evt.editor.element).attr('data-content-id'),
+              value: this.getData(),
+              locale: '{{ app.request.query.get('locale') }}'
+            };
+            sendMessage(JSON.stringify(data));
+          });
+          CKEDITOR.instances[i].on('focus', function(evt) {
+            $(evt.editor.element.$).css('display', 'block');
+          });
+          CKEDITOR.instances[i].on('blur', function(evt) {
+            $(evt.editor.element.$).css('display', '');
+          });
+
+        }
+      }
+
+      // loadEditors({origin: 'test'});
+
       // Listen to messages from parent window
       bindEvent(window, 'message', function (e) {
         if (typeof e.data !== 'string' || !e.data) return false;
@@ -61,179 +248,7 @@
         const action = messageData.action;
         switch (action) {
           case 'loadEditor':
-            $('a').on('click', function(e){
-              e.preventDefault();
-              return false;
-            });
-            parentUrl = e.origin;
-            // CKEDITOR.config.allowedContent = true;
-            CKEDITOR.config.extraAllowedContent = '*(*);*{*}';
-            CKEDITOR.dtd.$editable.a = 1;
-            CKEDITOR.disableAutoInline = true;
-            CKEDITOR.config.removeButtons = 'Image';
-            Object.assign(CKEDITOR.dtd.$editable, {{ comurEditableTags|json_encode|raw }})
-            // CKEDITOR.dtd.$editable.ul = 1;
-            // CKEDITOR.dtd.$editable.i = 1;
-            // CKEDITOR.dtd.$editable.li = 1;
-            // CKEDITOR.dtd.$editable.span = 1;
-            // CKEDITOR.dtd.$editable.td = 1;
-            // CKEDITOR.dtd.$editable.th = 1;
-
-            $('[data-content-id]').each(function(idx, el) {
-              const tagName = $(el)[0].tagName;
-
-              {% if enableComurImageBundle %}
-              if (tagName === 'IMG') {
-                const id = 'image_preview_image_' + $(el).data('content-id');
-                $(el).attr('id', id);
-                const imgBtn = $("<button class='btn btn-sm btn-success' style='width: 30px !important;padding: 5px;'><i class='fa fa-pencil'></i></button>");
-                const altBtn = $("<button class='btn btn-sm btn-"+($(el).attr('alt') && $(el).attr('alt').length > 0 ? 'warning' : 'danger')+"' style='width: 30px !important;padding: 5px;'>alt</button>")
-                const data = $(el).data();
-                // const comurImageData =  {
-                //   "uploadConfig": {
-                //     "uploadRoute":"comur_api_upload",
-                //     // "uploadUrl":"/app/public/uploads/pages/",
-                //     // "webDir":"uploads/pages",
-                //     "fileExt":"*.jpg;*.gif;*.png;*.jpeg",
-                //     // "libraryDir":"/app/public/uploads/pages/",
-                //     "libraryRoute":"comur_api_image_library",
-                //     "showLibrary":true,
-                //     "saveOriginal":false,
-                //     "generateFilename":true
-                //   },
-                //   "cropConfig": {
-                //     "minWidth":1200,
-                //     "minHeight":630,
-                //     "aspectRatio":true,
-                //     "cropRoute":"comur_api_crop",
-                //     "forceResize":true,
-                //     // "thumbs":[{
-                //     //   "maxWidth":600,
-                //     //   "maxHeight":300,
-                //     //   "useAsFieldImage":true
-                //     // }]
-                //   },
-                //   // "fieldImage": {
-                //   //   "maxWidth":600,
-                //   //   "maxHeight":300,
-                //   //   "useAsFieldImage":true
-                //   // }
-                // };
-                const comurImageData = {
-                  cropConfig: {},
-                  uploadConfig: {}
-                };
-                // console.log(data);
-                for(let d in data) {
-                  // console.log(d);
-                  if (d.indexOf('imageCrop') > -1) {
-                    comurImageData['cropConfig'][firstLetterLower(d.replace('imageCrop', ''))] = data[d];
-                  }
-                  if (d.indexOf('imageUpload') > -1) {
-                    comurImageData['uploadConfig'][firstLetterLower(d.replace('imageUpload', ''))] = data[d];
-                  }
-                  // console.log(comurImageData);
-                }
-
-                // Force to fit the exact size of the image if width and height are given
-                comurImageData['cropConfig']['minWidth'] = typeof $(el)[0].naturalWidth !== 'undefined' ? $(el)[0].naturalWidth : $(el).width();
-                comurImageData['cropConfig']['minHeight'] = typeof $(el)[0].naturalHeight !== 'undefined' ? $(el)[0].naturalHeight : $(el).height();
-
-                if ($(el).attr('width') && $(el).attr('height')) {
-                  comurImageData['cropConfig']['forceResize'] = typeof $(el)[0].naturalWidth !== 'undefined';
-                } else {
-                  comurImageData['cropConfig']['forceResize'] = true; //typeof data['force-resize'] !== 'undefined' && data['force-resize'];
-                }
-
-                const imagePosition = {
-                  top: $(el)[0].offsetTop,
-                  left: $(el)[0].offsetLeft,
-                  right: $(el).parent()[0].offsetWidth - $(el)[0].offsetWidth - ($(el)[0].offsetLeft),
-                };
-
-                // Ask parent to show ComurImageBundle to update image
-                imgBtn.on('click', function(){
-                  const data = {
-                    id: $(el).data('content-id'),
-                    // value: this.getData(),
-                    locale: '{{ app.request.query.get('locale') }}',
-                    request: 'getImage',
-                    comurImageData: comurImageData
-                  };
-                  sendMessage(JSON.stringify(data));
-                });
-                const css = {
-                  'position': 'absolute',
-                  'margin': '10px',
-                  'z-index': 1000,
-                  'height': '30px',
-                  'top': imagePosition.top+'px',
-                  'left': imagePosition.left
-                };
-                imgBtn.css(css);
-                $(el).parent().prepend(imgBtn);
-
-                css['marginLeft'] = '50px';
-                altBtn.css(css);
-
-                const altField = $("<div id='"+$(el).data('content-id')+"AltContainer'><input type='text' id='"+$(el).data('content-id')+"Alt' name='"+$(el).data('content-id')+"Alt' /><button class='btn btn-success btn-sm' style='width: 30px !important;padding: 5px;'><i class='fa fa-check'></i></button></div>")
-                css['display'] = 'none';
-                altField.css(css);
-                altField.find('input').val($(el).attr('alt'));
-
-                altBtn.on('click', function(){
-                  const altEl = $('#'+$(el).data('content-id')+'AltContainer');
-                  if (altEl.is(":visible")) {
-                    altEl.hide();
-                    altBtn.show();
-                  } else {
-                    altBtn.hide();
-                    altEl.show();
-                    altEl.css({display: 'inline'});
-                  }
-                });
-
-                altField.find('button').on('click', function(){
-                  const value = $("#"+$(el).data('content-id')+"Alt").val();
-                  const data = {
-                    id: $(el).data('content-id')+"Alt",
-                    value: value,
-                    locale: '{{ app.request.query.get('locale') }}'
-                  };
-                  sendMessage(JSON.stringify(data));
-                  $(this).parent().hide();
-                  altBtn.show();
-                  altBtn.removeClass('btn-warning');
-                  altBtn.removeClass('btn-danger');
-                  altBtn.addClass('btn-'+(value.length > 0 ? 'warning' : 'danger'))
-                });
-
-                {% if showImageSize is defined and showImageSize %}
-                  const imageSize = $("<div style='font-size: 12px;background-color: #555555; padding: 5px; color: white; position: absolute; top: "+imagePosition.top+"px;right: "+imagePosition.right+"px;'>"+comurImageData['cropConfig']['minWidth']+' x '+comurImageData['cropConfig']['minHeight']+"</div>")
-                  $(el).parent().prepend(imageSize);
-                {% endif %}
-
-                $(el).parent().prepend(altField);
-                $(el).parent().prepend(altBtn);
-              }
-              {% endif %}
-              if (tagName !== 'IMG') {
-                $(el).attr('contenteditable', true);
-                CKEDITOR.inline(el, {
-                  removeButtons: 'Image'
-                });
-              }
-            });
-            for (var i in CKEDITOR.instances) {
-              CKEDITOR.instances[i].on('change', function(evt) {
-                const data = {
-                  id: $(evt.editor.element).attr('data-content-id'),
-                  value: this.getData(),
-                  locale: '{{ app.request.query.get('locale') }}'
-                };
-                sendMessage(JSON.stringify(data));
-              });
-            }
+            loadEditors(e);
             break;
           case 'updateImage':
             if (messageData.data && messageData.data.src && messageData.data.contentId) {
