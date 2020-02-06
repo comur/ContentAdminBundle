@@ -4,14 +4,16 @@
         <div class="nav-tabs-custom" id="comurContentAdminContainer">
             <ul class="nav nav-tabs" role="tablist">
             {% for locale in locales %}
-                <li class="nav-item {{ loop.first ? "active" : "" }}">
-                    <a aria-controls="comurContentAdminIframeContainer_{{ locale }}" aria-expanded="true" href="#comurContentAdminIframeContainer_{{ locale }}" class="nav-link" data-toggle="tab" role="tab">{{ locale }}</a>
+                {% set _tab_name = 'comurContentAdminIframeContainer_' ~ locale %}
+                <li class="nav-item {% if (not app.request.query.has('_comurtab') and loop.index == 1) or (app.request.query.get('_comurtab') == _tab_name) %}active{% endif %}">
+                    <a aria-controls="{{ _tab_name }}" aria-expanded="true" href="#{{ _tab_name }}" class="comur-tab nav-link {% if (not app.request.query.has('_comurtab') and loop.index == 1) or (app.request.query.get('_comurtab') == _tab_name) %}active{% endif %}" data-toggle="tab" role="tab">{{ locale }}</a>
                 </li>
             {% endfor %}
             </ul>
             <div class="tab-content">
             {% for locale in locales %}
-                <div role="tabpanel" class="comurContentAdminIframeContainer tab-pane {{ loop.first ? "active": "" }}" id="comurContentAdminIframeContainer_{{ locale }}" style="min-height: {{ iframe_height|default('500') }}px">
+                {% set _tab_name = 'comurContentAdminIframeContainer_' ~ locale %}
+                <div role="tabpanel" class="comurContentAdminIframeContainer tab-pane {% if (not app.request.query.has('_comurtab') and loop.index == 1) or (app.request.query.get('_comurtab') == _tab_name) %}active{% endif %}" id="{{ _tab_name }}" style="min-height: {{ iframe_height|default('500') }}px">
                     <div class="comurContentAdminIframeFullscreenHeader" id="comurContentAdminIframeFullscreenHeader_{{ locale }}" style="z-index: 1051; display: none; height: 50px; line-height: 50px; padding-left: 10px; position: fixed; top: 0; left: 0; width: 100%; background-color: white;">
                         <a href="#" class="btn btn-warning fullscreenOff" id="fullscreenOff_{{ locale }}" data-locale="{{ locale }}"><i class="fa fa-compress"></i>&nbsp;{{ "Escape fullscreen"|trans({}, 'ComurContentAdminBundle') }}</a>
                     </div>
@@ -20,6 +22,7 @@
                     </div>
                     <iframe
                             class="comurContentAdminIframe"
+                            data-loaded="false"
                             id="comurContentAdminIframe_{{ locale }}"
                             data-locale="{{ locale }}"
                             width="100%"
@@ -55,7 +58,7 @@
           function loadIframe(template) {
             {% for locale in locales %}
                 if (template) {
-                  $('comurContentAdminContainer_{{ locale }}').show();
+                  $('#comurContentAdminContainer_{{ locale }}').show();
                   // Need timeout on some browsers...
                   setTimeout(function(){
                     $('#comurContentAdminIframe_{{ locale }}').attr('src', `{{ absolute_url(path('comur_content_admin.content_editor', {class: class})) }}&template=${template}&locale={{ locale }}&entityid={{ object is defined and object ? object.id : '' }}`)
@@ -156,6 +159,32 @@
             });
           }
           {% endif %}
+
+          // Keep last used tab active
+          jQuery('.comur-tab').on('click', function () {
+            var tab = jQuery(this).attr('aria-controls'),
+              search = location.search.substring(1);
+
+            /* Get query string parameters from URL */
+            var parameters = decodeURIComponent(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"'),
+              jsonURL = '{}';
+
+            /* If the parameters exist and their length is greater than 0, we put them in json */
+            if (parameters.length) {
+              jsonURL = '{"' + parameters + '"}';
+            }
+
+            var hashes = JSON.parse(jsonURL);
+
+            /* Replace tab parameter */
+            hashes._comurtab = tab;
+
+            /* Setting new URL */
+            var newurl = window.location.origin + window.location.pathname + '?' + jQuery.param(hashes, true);
+            window.history.pushState({
+              path: newurl
+            }, '', newurl);
+          });
 
         </script>
     {% endspaceless %}
